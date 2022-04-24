@@ -369,8 +369,6 @@ if __name__ == "__main__":
     #Get user credentials and verify login
    # email = input("Enter email:")
     #passw = input("Enter password:")
-    email = 'mattias@fleskligan.se'
-    passw = 'Folke2020?!'
     run_login = check_valid_email(email)
     if run_login:
         print(f'{OK}Attempting to login with {email}...')
