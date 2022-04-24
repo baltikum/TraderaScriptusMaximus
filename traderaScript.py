@@ -3,7 +3,7 @@ from selenium import webdriver
 from webdriver_manager.firefox import GeckoDriverManager
 from selenium.webdriver.common.by import By
 import traceback, time, re, logging
-
+import configparser
 
 
 email = ''
@@ -125,7 +125,11 @@ class Item:
     def confim_bid(self):
         trace = ''
         try:
+            start = time.time()
             self.confirm_bid_button.click()
+            end= time.time()
+            print(end-start)
+
             res = True
         except:
             trace = traceback.format_exc()
@@ -362,9 +366,39 @@ def login():
                 exit(f'{FAIL} Could not log in.')
     return logged_in
     
+def load_user():
+    try:
+        config_file = configparser.ConfigParser()
+        config_file.read("configurations.ini")
+        email = config_file["TraderaUserCredentials"]["username"]
+        passw = config_file["TraderaUserCredentials"]["password"]
+        res = True
+    except:
+        email = ''
+        passw = ''
+        res = False
+    return res, email, passw
+
+def write_user_to_config(email,passw):
+    trace = ''
+    try:
+        config_file = configparser.ConfigParser()
+        config_file.add_section("TraderaUserCredentials")
+        config_file.set("TraderaBidderSettings", "username", email )
+        config_file.set("TraderaBidderSettings", "password", passw )
+        with open(r"configurations.ini", 'w') as file:
+            config_file.write(file)
+            file.flush()
+            file.close()
+        res = True
+    except:
+        trace = traceback.format_exc()
+        res = False
+    return res, trace
 
 if __name__ == "__main__":
 
+    load_user()
  
     #Get user credentials and verify login
     email = input("Enter email:")
