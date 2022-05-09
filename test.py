@@ -1,11 +1,13 @@
+
+from webdriver_manager.firefox import GeckoDriverManager
 from selenium import webdriver
 from datetime import datetime
 from selenium.webdriver.common.by import By
 import time
 
-
-browser = webdriver.Firefox()
-browser.get('https://www.tradera.com/item/290923/538733449/voice-patrol-tactical-commander-figur-')
+browser = webdriver.Firefox(executable_path=GeckoDriverManager().install())
+#browser = webdriver.Firefox()
+browser.get('https://www.tradera.com/item/539715107')
 
 element = browser.find_element(By.XPATH,'html/body/div[1]/div/div/div/div[2]/div/button[2]')
 element.click()

@@ -1,9 +1,12 @@
 
 from selenium import webdriver
-#from webdriver_manager.firefox import GeckoDriverManager
+from webdriver_manager.firefox import GeckoDriverManager
 from selenium.webdriver.common.by import By
-import traceback, time, re, logging
+import traceback, time, re, logging, os, json
 import configparser
+
+from crontab import CronTab
+
 
 
 email = ''
@@ -59,6 +62,20 @@ class Item:
         self.ending = ''
         self.end_date_time = ''
 
+        self.end_month = 0
+        self.end_day = 0
+        self.end_hour = 0
+        self.end_minute = 0
+
+    def parse_end_date_time(self):
+            temp = self.end_date_time.split()
+            self.end_month = switch(temp[2].lower())
+            self.end_day = temp[1]
+
+            temp = temp[3].split(':')
+            self.end_hour = temp[0]
+            self.end_minute = temp[1]
+
     #Fetch basic info about object
     def fetch_item_data(self):
         trace = ''
@@ -71,6 +88,8 @@ class Item:
             self.ending = element.text
             element = self.driver.find_element(By.XPATH,"/html/body/div[1]/div[2]/div[2]/div/div[4]/aside/div[1]/section[1]/div[2]/div[1]/p")
             self.end_date_time = element.text
+            self.parse_end_date_time(self)
+
             res = True
         except:
             trace = traceback.format_exc()
@@ -135,7 +154,7 @@ class Item:
             trace = traceback.format_exc()
             res = False
         return res, trace
-    
+
 
 
 
@@ -355,7 +374,7 @@ def login():
         print(trace)
         exit(f'{FAIL} Could not find login input fields.')
 
-    if (driver_loaded and page_loaded and coockies_accepted and 
+    if (driver_loaded and page_loaded and coockies_accepted and
             popup_opened and iframe_loaded and input_fields_fetched) :
 
             logged_in, trace = post_login(email,passw)
@@ -365,7 +384,7 @@ def login():
                 print(trace)
                 exit(f'{FAIL} Could not log in.')
     return logged_in
-    
+
 def load_user():
     try:
         config_file = configparser.ConfigParser()
@@ -396,21 +415,46 @@ def write_user_to_config(email,passw):
         res = False
     return res, trace
 
+def write_booking_file(item):
+    data = []
+    data.append('{ title: ')
+    data.append(str(item.title))
+    data.append(", object_number: ")
+    data.append(str(item.objectNumber))
+    data.append(", bid_ammount: ")
+    data.append(str(item.bid))
+    data.append(", end_month: ")
+    data.append(str(item.end_month))
+    data.append(", end_day: ")
+    data.append(str(item.end_day))
+    data.append(", end_hour: ")
+    data.append(str(item.end_hour))
+    data.append(", end_minute: ")
+    data.append(str(item.end_minute))
+    data.append("}")
+    data = ''.join(data)
+    data = json.dumps(data)
+
+    with open( (str(item.objectNumber) + '.txt') , 'rw') as file:
+        res = file.write(data)
+    return res
+
 if __name__ == "__main__":
 
-    load_user()
- 
+    res, email, passw = load_user()
+
     #Get user credentials and verify login
-    email = input("Enter email:")
-    passw = input("Enter password:")
-    run_login = check_valid_email(email)
-    if run_login:
+    if not res :
+        email = input("Enter email:")
+        passw = input("Enter password:")
+        res = check_valid_email(email)
+
+    #Attempt login
+    if res:
         print(f'{OK}Attempting to login with {email}...')
         res = login()
         if res:
             print(f'{OK} Credentials verified.')
-
-
 
     #Get objectnumber and bid ammount
     objectNumber = input("Enter objectnumber:")
@@ -422,16 +466,24 @@ if __name__ == "__main__":
     if valid_bid and valid_obj_id:
         item_to_bid_on = Item(driver,objectNumber,bid,BID_LIMIT)
         success, trace = test_item(item_to_bid_on)
-        if success:
+        print(f'You want to bid {bid} on {objectNumber}')
+        res = write_booking_file(item_to_bid_on)
+        if success and res :
+            cron = CronTab(user='baltikum')
+            dir = os.getcwd()
+            print(dir)
+            booking  = cron.new(command='/usr/bin/echo snopp',
+                            comment=str(item_to_bid_on.objectNumber))
+            booking.month.on(item_to_bid_on.end_month)
+            booking.day.on(item_to_bid_on.end_day)
+            booking.hour.on(item_to_bid_on.end_hour)
+            booking.minute.on(item_to_bid_on.end_minute)
+            cron.write()
+
+            #job = cron.new(command="DISPLAY=:0 /usr/bin/python3 "
+            #                + "/home/baltikum/Documents/TraderaScriptusMaximus/bidding.py"
+            #                + " > /home/baltikum/Documents/TraderaScriptusMaximus/skript_log.txt" )
+            #cron.write()
             print(f'{OK} Item added successfully.')
         else:
             print(trace)
-
-    
-
-
-
-
-
-
-
