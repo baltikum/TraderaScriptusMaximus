@@ -6,12 +6,7 @@ import traceback, time, re, logging, os, json
 import configparser
 
 from crontab import CronTab
-
-
-
-email = ''
-passw = ''
-objectNumber = '536900083'
+from item_to_bid import Item
 
 
 
@@ -38,122 +33,6 @@ iframe_loaded = False
 input_fields_fetched = False
 
 
-class Item:
-    def __init__(self,driver,objectNumber,bid,bid_limit):
-        self.objectNumber = objectNumber
-        self.driver = driver
-        self.bid = bid
-        self.bid_limit = bid_limit
-
-        self.page_loaded = False
-
-        self.bid_posted = False
-        self.confirmed = False
-        self.data_fetched = False
-
-
-        self.bid_input_field = False
-        self.bid_button = False
-        self.confirm_bid_button = False
-
-
-        self.title = ''
-        self.price = ''
-        self.ending = ''
-        self.end_date_time = ''
-
-        self.end_month = 0
-        self.end_day = 0
-        self.end_hour = 0
-        self.end_minute = 0
-
-    def parse_end_date_time(self):
-            temp = self.end_date_time.split()
-            self.end_month = switch(temp[2].lower())
-            self.end_day = temp[1]
-
-            temp = temp[3].split(':')
-            self.end_hour = temp[0]
-            self.end_minute = temp[1]
-
-    #Fetch basic info about object
-    def fetch_item_data(self):
-        trace = ''
-        try:
-            element = self.driver.find_element(By.XPATH,"//*[@id='view-item-main']")
-            self.title = element.text
-            element = self.driver.find_element(By.XPATH,"/html/body/div[1]/div[2]/div[2]/div/div[4]/aside/div[1]/section[1]/div[1]/div[2]/p/span")
-            self.price = element.text
-            element = self.driver.find_element(By.XPATH,"/html/body/div[1]/div[2]/div[2]/div/div[4]/aside/div[1]/section[1]/div[2]/div[2]/p/span")
-            self.ending = element.text
-            element = self.driver.find_element(By.XPATH,"/html/body/div[1]/div[2]/div[2]/div/div[4]/aside/div[1]/section[1]/div[2]/div[1]/p")
-            self.end_date_time = element.text
-            self.parse_end_date_time(self)
-
-            res = True
-        except:
-            trace = traceback.format_exc()
-            res = False
-        return res, trace
-
-    #Load object page into webdriver, returns true if successfull and trace
-    def load_page(self):
-        trace = ''
-        try:
-            self.driver.get(f"https://www.tradera.com/item/{self.objectNumber}")
-            res = True
-        except:
-            trace = traceback.format_exc()
-            res = False
-        return res, trace
-
-    #Find bidding elements
-    def parse_bidding_elements(self):
-        try:
-            self.bidding_window = self.driver.find_element(By.XPATH,"/html/body/div[1]/div[2]/div[2]/div/div[4]/aside/div[1]/section[2]/form/div/input")
-            self.bid_button = self.driver.find_element(By.XPATH,"/html/body/div[1]/div[2]/div[2]/div/div[4]/aside/div[1]/section[2]/form/button")
-            res = True
-        except:
-            trace = traceback.format_exc()
-            res = True
-        return res, trace
-
-    #Find confirm bid button, returns false or true if successful
-    def parse_confirm_elements(self):
-        try:
-            self.confirm_bid_button = self.driver.find_element(By.XPATH,"/html/body/reach-portal/div[3]/div/div/div/div[2]/section/form/button")
-            res = True
-        except:
-            trace = traceback.format_exc()
-            res = False
-        return res
-
-    #Post initial bid, returns false or true if succesful
-    def post_bid(self):
-        trace = ''
-        try:
-            self.bid_input_field.send_keys(self.bid)
-            self.bid_button.click()
-            res = True
-        except:
-            trace = traceback.format_exc()
-            res = False
-        return res, trace
-
-    #Confirm the put bid, returns fale or true if succesful
-    def confim_bid(self):
-        trace = ''
-        try:
-            start = time.time()
-            self.confirm_bid_button.click()
-            end= time.time()
-            print(end-start)
-
-            res = True
-        except:
-            trace = traceback.format_exc()
-            res = False
-        return res, trace
 
 
 
