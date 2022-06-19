@@ -30,16 +30,22 @@ class Item:
 
 
 
+    def load_item(self,driver):
+        driver.get(self.URL)
+        loaded, trace = self.query_item(driver)
+        return loaded, trace
+
     def query_item(self,driver):
         res, trace = self.fetch_item_data(driver)
-        if not res:
-            return res, trace
+        return res, trace
         
-    def post_bid_ext(self, driver):
+    def post_bid_ext(self, driver, bid):
 
         res, trace = self.fetch_item_data(self, driver)
         if not res:
             return res, trace
+
+        
 
         res, trace = self.parse_bidding_elements(self, driver)
         if not res:
@@ -60,24 +66,22 @@ class Item:
 
         return res, trace
 
-
-
     #Parse end date times
     def parse_end_date_time(self, end_date):
         def translate_month(month):
             switch={
-               'januari': 1,
-               'februari': 2,
-               'mars': 3,
-               'april': 4,
-               'maj': 5,
-               'juni': 6,
-               'juli': 7,
-               'augusti': 8,
-               'september':9,
-               'oktober':10,
-               'november':11,
-               'december':12
+               'jan': 1,
+               'feb': 2,
+               'mar': 3,
+               'aprl': 4,
+               'maj': 5, #
+               'jun': 6, #confirmed
+               'jul': 7,
+               'aug': 8,
+               'sep':9,
+               'okt':10,
+               'nov':11,
+               'dec':12
                }
             return switch.get(month,0)
 
@@ -163,6 +167,8 @@ class Item:
         return res, trace
 
     def __repr__(self):
-        return (f'Bid {self.bid} on {self.title}' +
-        f' at {self.end_hour}:{self.end_minute}'
-         f' the {self.end_day}/{self.end_month}')
+        return (
+            f'Bid {self.bid}kr on : \n{self.title}\n' +
+            f'At {self.end_hour}:{self.end_minute}' +
+            f'the {self.end_day}/{self.end_month}.\n' +
+            f'Price currently at {self.price}.' )

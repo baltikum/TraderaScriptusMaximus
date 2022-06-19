@@ -7,8 +7,7 @@ import time
 
 browser = webdriver.Firefox(executable_path=GeckoDriverManager().install())
 #browser = webdriver.Firefox()
-browser.get('https://www.tradera.com/item/539715107')
-
+browser.get('https://www.tradera.com/item/545180245')
 element = browser.find_element(By.XPATH,'html/body/div[1]/div/div/div/div[2]/div/button[2]')
 element.click()
 
