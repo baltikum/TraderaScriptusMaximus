@@ -1,7 +1,7 @@
 from item_to_bid import Item
 from crontab import CronTab
 import sys
-
+import subprocess
 from session import open_session
 from selenium.webdriver.common.by import By
 
@@ -54,3 +54,9 @@ if __name__ == '__main__' :
             print('Not removed')
     else:
         print('Parameter error.')
+
+    
+
+    bashCommand = "crontab -l"
+    process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
+    output, error = process.communicate()

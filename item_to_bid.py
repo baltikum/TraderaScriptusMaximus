@@ -30,7 +30,7 @@ class Item:
 
 
 
-    def load_item(self,driver):
+    def load_object(self,driver):
         driver.get(self.URL)
         loaded, trace = self.query_item(driver)
         return loaded, trace
