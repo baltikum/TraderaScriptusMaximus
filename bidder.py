@@ -7,10 +7,7 @@ import logging
 from session import open_session, tradera_login
 from item_to_bid import Item
 from item_to_bid import load_item
-
-
-
-
+from booker import remove_booking
 
 
 def main(argv):
@@ -90,6 +87,8 @@ def main(argv):
     #bid_send.click()
 
     logging.info(f'BID NOW: {datetime.now()}')
+
+    remove_booking(item.object_number)
 
 
 if __name__ == '__main__' :

@@ -3,6 +3,8 @@
 
 from webdriver_manager.firefox import GeckoDriverManager
 from selenium import webdriver
+
+from selenium.webdriver.common.by import By
 import time, traceback
 
 base_url = 'https://www.tradera.com/'
@@ -10,8 +12,12 @@ base_url = 'https://www.tradera.com/'
 def open_session():
     trace = ''
     try:
+        options = webdriver.FirefoxOptions()
+        options.add_argument('headless')
+        options.add_argument('window-size=1200x600')
+
         #browser = webdriver.Firefox()
-        browser = webdriver.Firefox(executable_path=GeckoDriverManager().install())
+        browser = webdriver.Firefox(executable_path=GeckoDriverManager().install(),options=options)
         browser.get(base_url)
         time.sleep(3)
 
@@ -19,15 +25,19 @@ def open_session():
         button = browser.find_element(By.XPATH,xpath_accept_coockies)
         button.click()
 
-        xpath_reject_all = (
-            '/html/body/div[1]/div/div/div/div[1]/div/div[2]/button[1]')
-        button = browser.find_element(By.XPATH,xpath_reject_all)
-        button.click()
 
-        xpath_save_reject = (
-            '/html/body/div[1]/div/div/div/div[3]/div[2]/button')
-        button = browser.find_element(By.XPATH,xpath_save_reject)
-        button.click()
+
+        #GDPR Skit som togs bort igen ?
+        #
+        #xpath_reject_all = (
+        #    '/html/body/div[1]/div/div/div/div[1]/div/div[2]/button[1]')
+        #button = browser.find_element(By.XPATH,xpath_reject_all)
+        #button.click()
+
+        #xpath_save_reject = (
+        #    '/html/body/div[1]/div/div/div/div[3]/div[2]/button')
+        #button = browser.find_element(By.XPATH,xpath_save_reject)
+        #button.click()
 
         time.sleep(1)
         res = True
