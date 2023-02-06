@@ -19,7 +19,7 @@
 			function calculate_ending_time(end_time) {
 				let endDate = new Date(end_time)
                 let nowDate= new Date()
-                let delta = Math.abs(endDate - nowDate) / 1000;
+                let delta = (endDate - nowDate) / 1000;
                 let days = Math.floor(delta / 86400);
                 delta -= days * 86400;
                 let hours = Math.floor(delta / 3600) % 24;
@@ -40,7 +40,7 @@
                 fetch( url , options )
                     .then( response => response.json() )
                     .then( response => {
-                        //console.log(id)
+                        console.log(id)
                     } );
             };
 
@@ -54,7 +54,7 @@
                 fetch( url , options )
                     .then( response => response.json() )
                     .then( response => {
-                        //console.log(id)
+                        console.log(id)
                     } );
             }
 
@@ -125,8 +125,8 @@
 								//Cardclass and color
                                 if ( obj.objectList[i].ObservedItem == '0') {
                                     card.className = 'card text-white bg-success mb-3';
-				} else if ( ends_in[3] < 0 ) {
-				    card.className = 'card text-white bg-danger mb-3';
+                                } else if ( ends_in[3] < 0 ) {
+                                    card.className = 'card text-white bg-danger mb-3';
                                 } else if (ends_in[0] <= 1 && (ends_in[3]>0 || ends_in[2]>0 || ends_in[0]>0 )   ) {
                                     card.className = 'card text-white bg-warning mb-3';
                                 } else if (ends_in[3]<0 && ends_in[2]<=0 && ends_in[0]<=0) {
@@ -147,6 +147,9 @@
                                 const item_image = document.createElement("img");
                                 item_image.className = 'card-img-top';
                                 item_image.src = obj.objectList[i].imageUrl;
+                                item_image.addEventListener('click', function(){
+                                    $('#itemModal').modal('toggle');
+                                });
 								
 								
                                 const card_body= document.createElement('div');
@@ -168,6 +171,9 @@
                                 card_footer.className = 'card-footer';
                                 footer_small.className = 'text-white';
                                 footer_small.innerText = auction_ends
+                                card_footer.addEventListener('click', function(){
+                                    itemHide(obj.objectList[i].itemId);
+                                });
 
 
                                 card_body.appendChild(card_title);
@@ -178,11 +184,11 @@
                                 card.appendChild(card_footer);
 
                                 card.addEventListener('contextmenu', function(){
-                                    //itemHide(obj.objectList[i].itemId);
                                     $('#searchModal').modal('toggle')
                                 });
                                 
                                 card.addEventListener('click', function(){
+                                    
 									itemData(obj.objectList[i].itemId).then((data) => {
                                         jsonData = data;
                                         console.log(jsonData.object)
@@ -191,7 +197,6 @@
                                         document.getElementById('itemModalPrice').innerHTML = jsonData.object.price + " kr"
                                         document.getElementById('itemModalItemId').innerText = jsonData.object.itemId
                                         document.getElementById('itemModalHideItem').addEventListener('click',function() {
-                                        console.log(jsonData.object.showItem)
                                         if ( jsonData.object.showItem== "1" ) {
                                             itemHide(obj.objectList[i].itemId);
                                             card.className = 'card text-white bg-dark mb-3';
@@ -210,7 +215,7 @@
                                                 card.className = 'card text-white bg-secondary mb-3';
                                             }
                                         }
-                                        $('#itemModal').modal('toggle')
+                                        //$('#itemModal').modal('toggle')
                                         });
                                         document.getElementById('itemModalTraderaButton').addEventListener('click', function() {
                                             url = "https://www.tradera.com/item/"+ jsonData.object.itemId;
@@ -221,10 +226,9 @@
                                         });
                                     })
                                      
-                                    $('#itemModal').modal('toggle')
-                                    
 
                                     document.getElementById('itemModalTotalBids').innerText = obj.objectList[i].totalBids + " st"
+                                    document.getElementById('itemModalSearchTerm').innerText = obj.objectList[i].searchTerm
 
 
 									let ending_values = calculate_ending_time(obj.objectList[i].endDate)
@@ -255,7 +259,22 @@
                         });
 
 
+            $('#search_form').on('submit', function(e){
+                e.preventDefault();
+                var dat = document.getElementById("search").value;
+                const options = {
+                    method: 'POST',
+                    term: dat
+                };
+                var url = "/add_search/"
+                fetch( url , options )
+                    .then( response => response.json() )
+                    .then( response => {
+                        console.log(id)
+                    } );
 
+
+                });
         </script>
 
 
@@ -277,6 +296,8 @@
                         <h4 class="modal-title" id="itemModalItemId">Item id</h4>
                         <label for="itemModalPrice">Total bids</h4>
                         <h4 class="modal-title" id="itemModalTotalBids">Total bids</h4>
+                        <label for="itemModalSearchTerm">Search</h4>
+                        <h4 class="modal-title" id="itemModalSearchTerm">Total bids</h4>
         
 
                         <button type="button" id="itemModalHideItem" class="btn btn-dark btn-lg" >Hide</button>
@@ -322,8 +343,10 @@
                                 <div class="input-group-prepend">
                                     <span class="input-group-text" id="inputGroup-sizing-default">Searchterm</span>
                                 </div>
-                                <input type="text" class="form-control" aria-label="Ammount" aria-describedby="inputGroup-sizing-default">
-                                <button type="button" class="btn btn-primary btn-lg">Add</button>
+                                <form id="search_form">
+                                    <input type="text" class="form-control" id="search" aria-label="Ammount" aria-describedby="inputGroup-sizing-default">
+                                    <button type="button" onClick="submit" class="btn btn-primary btn-lg">Add</button>
+                                </form>
                             </div>
                         </div>
                     </form>

@@ -25,7 +25,8 @@ standard_item = [
                 "sellerAlias",
                 "showItem",
                 "BidOnItem",
-                "ObservedItem"
+                "ObservedItem",
+                "searchTerm"
                 ]
 
 def get_full_search_data():
